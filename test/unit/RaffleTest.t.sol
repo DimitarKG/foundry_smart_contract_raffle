@@ -218,9 +218,16 @@ contract TestRaffle is Test {
     //fulfillRandomWords
     //////////////////////////////////////////////////
 
+    modifier skipOnChain() {
+        if (block.chainid != 31337) {
+            return;
+        }
+        _;
+    }
+
     function testFulfillRandomWordsCanOnlyBeCalledAfterPerformUpkeep(
         uint256 randomRequestId
-    ) public funded timeSkip {
+    ) public skipOnChain funded timeSkip {
         //Arange
         vm.expectRevert("nonexistent request");
         VRFCoordinatorV2Mock(vrfCoordinator).fulfillRandomWords(
@@ -231,6 +238,7 @@ contract TestRaffle is Test {
 
     function testFulfillRandomWordsPicksWinnerResetsAndSendsMoney()
         public
+        skipOnChain
         funded
         timeSkip
     {
@@ -267,7 +275,7 @@ contract TestRaffle is Test {
         assert(raffle.getPlayerArrayLength() == 0);
         assert(raffle.getLastTimeStamp() > previousTimeStamp);
         console.log(raffle.getRecentWinner().balance);
-        console.log(prize + STARTING_USER_BALANCE);
+        console.log(prize + STARTING_USER_BALANCE - entranceFee);
         assert(
             raffle.getRecentWinner().balance ==
                 prize + STARTING_USER_BALANCE - entranceFee
