@@ -65,3 +65,4 @@ forge coverage
 ```
 # Deployment to a testnet or mainnet
 ## Doesn't work
+The VRF is V2
